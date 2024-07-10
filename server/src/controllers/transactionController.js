@@ -2,7 +2,6 @@ import Transaction from "../model/transactionModel.js";
 
 // Create transaction
 export const createTransaction = async (req, res) => {
-  console.log(req.body);
   const { type, amount, category, date, description } = req.body;
   const transaction = new Transaction({
     userId: req.user.id,
