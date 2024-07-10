@@ -1,7 +1,9 @@
 import { useForm } from "react-hook-form";
 import API from "../api";
+import { useNavigate } from "react-router-dom";
 
 const TransactionForm = () => {
+  const navigate = useNavigate();
   const { register, handleSubmit, errors } = useForm({
     defaultValues: {
       amount: "",
@@ -25,7 +27,9 @@ const TransactionForm = () => {
   const onSubmit = async (data) => {
     try {
       const res = await API.post("/api/transactions", data);
-      console.log(res);
+      if (res.status === 201) {
+        navigate("/transactions");
+      }
     } catch (error) {
       console.error(error);
     }
