@@ -1,51 +1,38 @@
-import { useState } from "react";
-import { useAuth } from "../context";
-import axios from "axios";
+import { useForm } from "react-hook-form";
 import API from "../api";
 
-const categories = [
-  { name: "Home", id: 1 },
-  { name: "Business", id: 2 },
-  { name: "Gym", id: 3 },
-  { name: "Food", id: 4 },
-  { name: "Transportation", id: 5 },
-  { name: "Entertainment", id: 6 },
-  { name: "Shopping", id: 7 },
-  { name: "Miscellaneous", id: 8 },
-];
-
 const TransactionForm = () => {
-  const [amount, setAmount] = useState("");
-  const [type, setType] = useState("income");
-  const [category, setCategory] = useState("");
-  const [description, setDescription] = useState("");
-  const { user } = useAuth();
+  const { register, handleSubmit, errors } = useForm({
+    defaultValues: {
+      amount: "",
+      type: "",
+      category: "",
+      description: "",
+    },
+  });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const transaction = {
-      amount,
-      type,
-      category,
-      description,
-      userId: user._id,
-    };
+  const categories = [
+    { id: 1, name: "Salary" },
+    { id: 2, name: "Business" },
+    { id: 3, name: "Investment" },
+    { id: 4, name: "Savings" },
+    { id: 5, name: "Insurance" },
+    { id: 6, name: "Gift" },
+    { id: 7, name: "Rental" },
+    { id: 8, name: "Loan" },
+  ];
 
+  const onSubmit = async (data) => {
     try {
-      await API.post("/api/transactions", transaction);
-      setAmount("");
-      setCategory("");
-      setDescription("");
+      const res = await API.post("/api/transactions", data);
+      console.log(res);
     } catch (error) {
       console.error(error);
     }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="max-w-md mx-auto p-6 pt-10 pb-8 rounded-lg bg-white shadow-md"
-    >
+    <form onSubmit={handleSubmit(onSubmit)}>
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Add Transaction</h2>
       <div className="grid grid-cols-1 gap-4 mb-6">
         <label
@@ -57,12 +44,13 @@ const TransactionForm = () => {
         <input
           type="number"
           id="amount"
+          {...register("amount", { required: true })}
           placeholder="Amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          required
           className="w-full px-3 py-2 text-base text-gray-700 placeholder-gray-600 border border-gray-300 rounded-md focus:outline-none focus:border-blue-300 transition duration-500 ease-in-out"
         />
+        {errors?.amount && (
+          <div className="text-red-600">{errors.amount.message}</div>
+        )}
       </div>
       <div className="grid grid-cols-1 gap-4 mb-6">
         <label
@@ -73,13 +61,15 @@ const TransactionForm = () => {
         </label>
         <select
           id="type"
-          value={type}
-          onChange={(e) => setType(e.target.value)}
+          {...register("type", { required: true })}
           className="w-full px-3 py-2 text-base text-gray-700 placeholder-gray-600 border border-gray-300 rounded-md focus:outline-none focus:border-blue-300 transition duration-500 ease-in-out"
         >
           <option value="income">Income</option>
           <option value="expense">Expense</option>
         </select>
+        {errors?.type && (
+          <div className="text-red-600">{errors.type.message}</div>
+        )}
       </div>
       <div className="grid grid-cols-1 gap-4 mb-6">
         <label
@@ -90,16 +80,18 @@ const TransactionForm = () => {
         </label>
         <select
           id="category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
+          {...register("category", { required: true })}
           className="w-full px-3 py-2 text-base text-gray-700 placeholder-gray-600 border border-gray-300 rounded-md focus:outline-none focus:border-blue-300 transition duration-500 ease-in-out"
         >
-          {categories.map((category) => (
+          {categories?.map((category) => (
             <option key={category.id} value={category.name}>
               {category.name}
             </option>
           ))}
         </select>
+        {errors?.category && (
+          <div className="text-red-600">{errors.category.message}</div>
+        )}
       </div>
       <div className="grid grid-cols-1 gap-4 mb-6">
         <label
@@ -111,9 +103,8 @@ const TransactionForm = () => {
         <input
           type="text"
           id="description"
+          {...register("description")}
           placeholder="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
           className="w-full px-3 py-2 text-base text-gray-700 placeholder-gray-600 border border-gray-300 rounded-md focus:outline-none focus:border-blue-300 transition duration-500 ease-in-out"
         />
       </div>

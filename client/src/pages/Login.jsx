@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { Navigate, useNavigate } from "react-router-dom";
 import API from "../api";
 import { useAuth } from "../context";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { register, handleSubmit, errors } = useForm();
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -13,24 +12,20 @@ const Login = () => {
     return <Navigate to="/" />;
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const onSubmit = async (data) => {
     try {
-      const { data } = await API.post("/api/users/login", {
-        email,
-        password,
-      });
-      localStorage.setItem("token", data.token);
+      const response = await API.post("/api/users/login", data);
+      localStorage.setItem("token", response.data.token);
       window.location.reload("/");
     } catch (error) {
       console.error(error);
     }
   };
+
   return (
     <div className="max-w-md mx-auto p-4 pt-6 pb-10 bg-white shadow-md rounded-md">
       <h2 className="text-2xl font-bold mb-4">Login</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mb-4">
           <label
             className="block text-gray-600 text-sm font-bold mb-2"
@@ -42,11 +37,10 @@ const Login = () => {
             type="email"
             id="email"
             placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+            {...register("email", { required: true })}
             className="w-full p-3 text-sm text-gray-600 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-gray-300"
           />
+          {errors?.email && <p>Invalid email</p>}
         </div>
         <div className="mb-4">
           <label
@@ -59,11 +53,10 @@ const Login = () => {
             type="password"
             id="password"
             placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            {...register("password", { required: true })}
             className="w-full p-3 text-sm text-gray-600 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-gray-300"
           />
+          {errors?.password && <p>Invalid password</p>}
         </div>
         <button
           type="submit"
